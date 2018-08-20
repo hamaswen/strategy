@@ -49,6 +49,8 @@ def main():
     logging.info('Total count: {0}'.format(len(all_stock_code)))
     for stock_code in all_stock_code:
         store_stock_data(stock_code)
+    for stock_code in ['510050', '510300', '510180', '159902', '159915', '159903', '159902']:
+        store_stock_data(stock_code)
     return
 
 
