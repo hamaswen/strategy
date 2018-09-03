@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import tushare as ts
 import pandas as pd
+import numpy as np
 import os.path
 import logging
 
@@ -73,7 +74,7 @@ def get_train_test_data(input_days):
     """
     for file_name in os.listdir(stock_dir):
         stock_file_path = os.path.join(stock_dir, file_name)
-        logging.debug('Reading "{0}" ...'.format(stock_file_path))
+        logging.info('Reading "{0}" ...'.format(stock_file_path))
         data = pd.read_hdf(stock_file_path, key='A' + os.path.splitext(file_name)[0])
         logging.debug('Original shape: {0} Remove columns - "date" and "code"'.format(data.shape))
         del data['date']
@@ -82,10 +83,21 @@ def get_train_test_data(input_days):
         data.dropna(inplace=True)
         logging.debug('Final shape: {0}'.format(data.shape))
         logging.info('Translate to X Y data sets')
+        data_x_list = []
+        data_y_list = []
         for i in range(len(data)-input_days-1):
-            print(data[i:i+input_days])
-            print(data.iloc[i + input_days + 1]['close'])
-            break
+            data_x = data[i:i+input_days]
+            current_close = data.iloc[i + input_days - 1]['close']
+            next_close = data.iloc[i + input_days]['close']
+            increase_percentage = 100 * (next_close - current_close)/current_close
+            data_y = increase_percentage
+            data_x_list.append(data_x.values)
+            data_y_list.append(data_y)
+        data_X = np.dstack(data_x_list)
+        data_Y = np.stack(data_y_list)
+        print(data_X.shape)
+        print(data_Y.shape)
+        # data_X = np.rollaxis(data_X, -1)
         # train data 90%
         # test data 10%
         break
