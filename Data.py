@@ -3,11 +3,50 @@
 import tushare as ts
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
 import os.path
 import logging
 
 
 stock_dir = 'E:\\gitroot\\runtime\\Output\\A'
+
+
+def map_to_y(increase_percentage):
+    """
+    Give a class for given rate
+    :param increase_percentage:
+    :return: array with 0 and 1 which 1 represents the range of increase rate
+    """
+    y = np.zeros((14, 1), np.int8)
+    if increase_percentage >= 10:
+        y[0] = 1
+    elif 7 <= increase_percentage < 10:
+        y[1] = 1
+    elif 4 <= increase_percentage < 7:
+        y[2] = 1
+    elif 2 <= increase_percentage < 4:
+        y[3] = 1
+    elif 1 <= increase_percentage < 2:
+        y[4] = 1
+    elif 0.5 <= increase_percentage < 1:
+        y[5] = 1
+    elif 0 <= increase_percentage < 0.5:
+        y[6] = 1
+    elif -0.5 < increase_percentage < 0:
+        y[7] = 1
+    elif -1 < increase_percentage <= -0.5:
+        y[8] = 1
+    elif -2 < increase_percentage <= -1:
+        y[9] = 1
+    elif -4 < increase_percentage <= -2:
+        y[10] = 1
+    elif -7 < increase_percentage <= -4:
+        y[11] = 1
+    elif -10 < increase_percentage <= -7:
+        y[12] = 1
+    else:
+        y[13] = 1
+    return y
 
 
 def store_stock_data(stock_code, output_dir, skip_existed_file=True):
@@ -32,12 +71,12 @@ def store_stock_data(stock_code, output_dir, skip_existed_file=True):
         logging.info('No data found of {0}'.format(stock_code))
         return
     # add indicators
-    base_data['ma5'] = base_data['close'].rolling(5).mean()
-    base_data['ma10'] = base_data['close'].rolling(10).mean()
-    base_data['ma20'] = base_data['close'].rolling(20).mean()
-    base_data['ma60'] = base_data['close'].rolling(60).mean()
-    base_data['ma120'] = base_data['close'].rolling(120).mean()
-    base_data['ma250'] = base_data['close'].rolling(250).mean()
+    base_data['ma5'] = round(base_data['close'].rolling(5).mean(), 3)
+    base_data['ma10'] = round(base_data['close'].rolling(10).mean(), 3)
+    base_data['ma20'] = round(base_data['close'].rolling(20).mean(), 3)
+    base_data['ma60'] = round(base_data['close'].rolling(60).mean(), 3)
+    base_data['ma120'] = round(base_data['close'].rolling(120).mean(), 3)
+    base_data['ma250'] = round(base_data['close'].rolling(250).mean(), 3)
     logging.debug(base_data.shape)
 
     # save as hdf5
@@ -72,6 +111,8 @@ def get_train_test_data(input_days):
     :param input_days: number of the trading days for input
     :return:
     """
+    data_x_list = []
+    data_y_list = []
     for file_name in os.listdir(stock_dir):
         stock_file_path = os.path.join(stock_dir, file_name)
         logging.info('Reading "{0}" ...'.format(stock_file_path))
@@ -83,24 +124,25 @@ def get_train_test_data(input_days):
         data.dropna(inplace=True)
         logging.debug('Final shape: {0}'.format(data.shape))
         logging.info('Translate to X Y data sets')
-        data_x_list = []
-        data_y_list = []
         for i in range(len(data)-input_days-1):
             data_x = data[i:i+input_days]
             current_close = data.iloc[i + input_days - 1]['close']
             next_close = data.iloc[i + input_days]['close']
             increase_percentage = 100 * (next_close - current_close)/current_close
-            data_y = increase_percentage
+            data_y = map_to_y(increase_percentage)
             data_x_list.append(data_x.values)
             data_y_list.append(data_y)
-        data_X = np.dstack(data_x_list)
-        data_Y = np.stack(data_y_list)
-        print(data_X.shape)
-        print(data_Y.shape)
-        # data_X = np.rollaxis(data_X, -1)
-        # train data 90%
-        # test data 10%
-        break
+    data_X = np.stack(data_x_list)
+    data_Y = np.stack(data_y_list)
+    logging.debug(data_X.shape)
+    logging.debug(data_Y.shape)
+    # Split train data (85%) and test data (15%)
+    # memory error
+    X_train, X_test, Y_train, Y_test = train_test_split(data_X, data_Y, test_size=0.15)
+    logging.debug(X_train.shape)
+    logging.debug(X_test.shape)
+    logging.debug(Y_train.shape)
+    logging.debug(Y_test.shape)
     pass
 
 
@@ -110,7 +152,7 @@ def main():
     pd.set_option('display.max_rows', 100)
     pd.set_option('display.max_columns', 100)
     # store_all_stock_data(stock_dir)
-    get_train_test_data(20)
+    # get_train_test_data(20)
     return
 
 
