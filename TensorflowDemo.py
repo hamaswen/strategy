@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tf_utils import load_dataset, random_mini_batches, convert_to_one_hot, predict
 from tensorflow.python.framework import ops
+from sys import exit
 
 # Loading the dataset
 X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = load_dataset()
@@ -29,6 +30,7 @@ print("X_train shape: " + str(X_train.shape))
 print("Y_train shape: " + str(Y_train.shape))
 print("X_test shape: " + str(X_test.shape))
 print("Y_test shape: " + str(Y_test.shape))
+exit(0)
 
 
 # GRADED FUNCTION: create_placeholders

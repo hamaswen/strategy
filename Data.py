@@ -6,9 +6,11 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import os.path
 import logging
+import h5py
 
 
-stock_dir = 'E:\\gitroot\\runtime\\Output\\A'
+# stock_dir = 'E:\\gitroot\\runtime\\Output\\A'
+stock_dir = 'E:\\gitroot\\runtime\\Output\\Demo'
 
 
 def map_to_y(increase_percentage):
@@ -129,7 +131,7 @@ def get_train_test_data(input_days):
             current_close = data.iloc[i + input_days - 1]['close']
             next_close = data.iloc[i + input_days]['close']
             increase_percentage = 100 * (next_close - current_close)/current_close
-            data_y = map_to_y(increase_percentage)
+            data_y = increase_percentage
             data_x_list.append(data_x.values)
             data_y_list.append(data_y)
     data_X = np.stack(data_x_list)
@@ -139,10 +141,18 @@ def get_train_test_data(input_days):
     # Split train data (85%) and test data (15%)
     # memory error
     X_train, X_test, Y_train, Y_test = train_test_split(data_X, data_Y, test_size=0.15)
+    Y_train = Y_train.reshape(1, Y_train.shape[0])
+    Y_test = Y_test.reshape(1, Y_test.shape[0])
     logging.debug(X_train.shape)
     logging.debug(X_test.shape)
     logging.debug(Y_train.shape)
     logging.debug(Y_test.shape)
+    with h5py.File('datasets/train_stock.h5', 'w') as train_data_file:
+        train_data_file.create_dataset('train_set_x', data=X_train)
+        train_data_file.create_dataset('train_set_y', data=Y_train)
+    with h5py.File('datasets/test_stock.h5', 'w') as test_data_file:
+        test_data_file.create_dataset('test_set_x', data=X_test)
+        test_data_file.create_dataset('test_set_y', data=Y_test)
     pass
 
 
@@ -152,7 +162,7 @@ def main():
     pd.set_option('display.max_rows', 100)
     pd.set_option('display.max_columns', 100)
     # store_all_stock_data(stock_dir)
-    # get_train_test_data(20)
+    get_train_test_data(20)
     return
 
 
