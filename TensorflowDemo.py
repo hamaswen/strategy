@@ -4,15 +4,25 @@ import matplotlib.pyplot as plt
 from tf_utils import load_dataset, random_mini_batches, convert_to_one_hot, predict
 from tensorflow.python.framework import ops
 from sys import exit
+import mpl_finance as mplf
 
 # Loading the dataset
-X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = load_dataset()
+X_train_orig, Y_train_orig, X_test_orig, Y_test_orig = load_dataset()
 
-# Example of a picture
-print(Y_train_orig.shape)
+# Example of a K chart
 index = 0
-plt.imshow(X_train_orig[index])
 print("y = " + str(np.squeeze(Y_train_orig[:, index])))
+print(X_train_orig[index].shape)
+print(X_train_orig[index][:, :4].shape)
+quotes = np.column_stack((range(20), X_train_orig[index][:, :4]))
+quotes[:, [2, 3, 4]] = quotes[:, [3, 4, 2]]
+fig, ax = plt.subplots()
+mplf.candlestick_ohlc(ax, quotes, width=0.4, colorup='r', colordown='g')
+plt.grid(False)
+ax.autoscale_view()
+plt.setp(plt.gca().get_xticklabels(), rotation=30)
+plt.show()
+exit(0)
 
 # Flatten the training and test images
 X_train_flatten = X_train_orig.reshape(X_train_orig.shape[0], -1).T
