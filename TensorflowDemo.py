@@ -22,7 +22,6 @@ plt.grid(False)
 ax.autoscale_view()
 plt.setp(plt.gca().get_xticklabels(), rotation=30)
 plt.show()
-exit(0)
 
 # Flatten the training and test images
 X_train_flatten = X_train_orig.reshape(X_train_orig.shape[0], -1).T
@@ -31,8 +30,8 @@ X_test_flatten = X_test_orig.reshape(X_test_orig.shape[0], -1).T
 X_train = X_train_flatten / 255.
 X_test = X_test_flatten / 255.
 # Convert training and test labels to one hot matrices
-Y_train = convert_to_one_hot(Y_train_orig, 6)
-Y_test = convert_to_one_hot(Y_test_orig, 6)
+Y_train = Y_train_orig
+Y_test = Y_test_orig
 
 print("number of training examples = " + str(X_train.shape[1]))
 print("number of test examples = " + str(X_test.shape[1]))
@@ -40,7 +39,6 @@ print("X_train shape: " + str(X_train.shape))
 print("Y_train shape: " + str(Y_train.shape))
 print("X_test shape: " + str(X_test.shape))
 print("Y_test shape: " + str(Y_test.shape))
-exit(0)
 
 
 # GRADED FUNCTION: create_placeholders
@@ -67,7 +65,7 @@ def create_placeholders(n_x, n_y):
     return X, Y
 
 
-X, Y = create_placeholders(12288, 6)
+X, Y = create_placeholders(220, 14)
 print("X = " + str(X))
 print("Y = " + str(Y))
 
@@ -89,12 +87,12 @@ def initialize_parameters():
 
     tf.set_random_seed(1)  # so that your "random" numbers match ours
 
-    W1 = tf.get_variable("W1", [25, 12288], initializer=tf.contrib.layers.xavier_initializer(seed=1))
+    W1 = tf.get_variable("W1", [25, 220], initializer=tf.contrib.layers.xavier_initializer(seed=1))
     b1 = tf.get_variable("b1", [25, 1], initializer=tf.zeros_initializer())
     W2 = tf.get_variable("W2", [12, 25], initializer=tf.contrib.layers.xavier_initializer(seed=1))
     b2 = tf.get_variable("b2", [12, 1], initializer=tf.zeros_initializer())
-    W3 = tf.get_variable("W3", [6, 12], initializer=tf.contrib.layers.xavier_initializer(seed=1))
-    b3 = tf.get_variable("b3", [6, 1], initializer=tf.zeros_initializer())
+    W3 = tf.get_variable("W3", [14, 12], initializer=tf.contrib.layers.xavier_initializer(seed=1))
+    b3 = tf.get_variable("b3", [14, 1], initializer=tf.zeros_initializer())
 
     parameters = {"W1": W1,
                   "b1": b1,

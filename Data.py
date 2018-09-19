@@ -131,7 +131,7 @@ def get_train_test_data(input_days):
             current_close = data.iloc[i + input_days - 1]['close']
             next_close = data.iloc[i + input_days]['close']
             increase_percentage = 100 * (next_close - current_close)/current_close
-            data_y = increase_percentage
+            data_y = map_to_y(increase_percentage)
             data_x_list.append(data_x.values)
             data_y_list.append(data_y)
     data_X = np.stack(data_x_list)
@@ -141,8 +141,8 @@ def get_train_test_data(input_days):
     # Split train data (85%) and test data (15%)
     # memory error
     X_train, X_test, Y_train, Y_test = train_test_split(data_X, data_Y, test_size=0.15)
-    Y_train = Y_train.reshape(1, Y_train.shape[0])
-    Y_test = Y_test.reshape(1, Y_test.shape[0])
+    Y_train = Y_train.reshape(Y_train.shape[0], -1).T
+    Y_test = Y_test.reshape(Y_test.shape[0], -1).T
     logging.debug(X_train.shape)
     logging.debug(X_test.shape)
     logging.debug(Y_train.shape)
