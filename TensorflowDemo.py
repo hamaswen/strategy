@@ -158,7 +158,7 @@ def compute_cost(Z3, Y):
     return cost
 
 
-def model(X_train, Y_train, X_test, Y_test, learning_rate=0.0001,
+def model(X_train, Y_train, X_test, Y_test, learning_rate=0.0001, lambd=0.001,
           num_epochs=1500, minibatch_size=32, print_cost=True):
     """
     Implements a three-layer tensorflow neural network: LINEAR->RELU->LINEAR->RELU->LINEAR->SOFTMAX.
@@ -195,6 +195,8 @@ def model(X_train, Y_train, X_test, Y_test, learning_rate=0.0001,
 
     # Cost function: Add cost function to tensorflow graph
     cost = compute_cost(Z3, Y)
+    l2_loss = tf.nn.l2_loss(parameters['W1']) + tf.nn.l2_loss(parameters['W2']) + tf.nn.l2_loss(parameters['W3'])
+    cost = tf.add(cost, tf.multiply(lambd, l2_loss))
 
     # Backpropagation: Define the tensorflow optimizer. Use an AdamOptimizer.
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
