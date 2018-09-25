@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 from tf_utils import load_dataset, random_mini_batches, convert_to_one_hot, predict
 from tensorflow.python.framework import ops
 from sys import exit
+from sklearn import preprocessing
 import mpl_finance as mplf
 
 # Loading the dataset
 X_train_orig, Y_train_orig, X_test_orig, Y_test_orig = load_dataset()
-
+'''
 # Example of a K chart
 index = 0
 print("y = " + str(np.squeeze(Y_train_orig[:, index])))
@@ -22,13 +23,18 @@ plt.grid(False)
 ax.autoscale_view()
 plt.setp(plt.gca().get_xticklabels(), rotation=30)
 plt.show()
-
+'''
 # Flatten the training and test images
-X_train_flatten = X_train_orig.reshape(X_train_orig.shape[0], -1).T
-X_test_flatten = X_test_orig.reshape(X_test_orig.shape[0], -1).T
+X_train_flatten = X_train_orig.reshape(X_train_orig.shape[0], -1)
+X_test_flatten = X_test_orig.reshape(X_test_orig.shape[0], -1)
 # Normalize image vectors
-X_train = X_train_flatten / 255.
-X_test = X_test_flatten / 255.
+print(X_train_flatten.shape)
+print(X_test_flatten.shape)
+scaler = preprocessing.StandardScaler().fit(X_train_flatten)
+X_train = scaler.transform(X_train_flatten).T
+X_test = scaler.transform(X_test_flatten).T
+print(X_train.shape)
+print(X_test.shape)
 # Convert training and test labels to one hot matrices
 Y_train = Y_train_orig
 Y_test = Y_test_orig
